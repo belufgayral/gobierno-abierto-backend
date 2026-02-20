@@ -1,0 +1,145 @@
+---
+description: Estándares de testing para NestJS
+globs: **/*.spec.ts,**/*.e2e-spec.ts
+alwaysApply: false
+---
+
+# Testing en NestJS
+
+## Estructura de Tests
+
+```typescript
+// ✅ GOOD - Tests unitarios para servicios
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { PdfService } from './pdf.service';
+import { Pdf } from './pdf.entity';
+
+describe('PdfService', () => {
+  let service: PdfService;
+  let repository: Repository<Pdf>;
+
+  const mockRepository = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    remove: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        PdfService,
+        {
+          provide: getRepositoryToken(Pdf),
+          useValue: mockRepository,
+        },
+      ],
+    }).compile();
+
+    service = module.get<PdfService>(PdfService);
+    repository = module.get<Repository<Pdf>>(getRepositoryToken(Pdf));
+  });
+
+  it('debería encontrar todos los PDFs', async () => {
+    const pdfs = [new Pdf(), new Pdf()];
+    mockRepository.find.mockResolvedValue(pdfs);
+
+    const result = await service.findAll();
+
+    expect(result).toEqual(pdfs);
+    expect(mockRepository.find).toHaveBeenCalled();
+  });
+});
+```
+
+## Tests de Controladores
+
+```typescript
+// ✅ GOOD - Tests de controladores con mocks de servicios
+describe('PdfController', () => {
+  let controller: PdfController;
+  let service: PdfService;
+
+  const mockPdfService = {
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    remove: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [PdfController],
+      providers: [
+        {
+          provide: PdfService,
+          useValue: mockPdfService,
+        },
+      ],
+    }).compile();
+
+    controller = module.get<PdfController>(PdfController);
+    service = module.get<PdfService>(PdfService);
+  });
+
+  it('debería retornar una lista de PDFs', async () => {
+    const pdfs = [new Pdf(), new Pdf()];
+    mockPdfService.findAll.mockResolvedValue(pdfs);
+
+    const result = await controller.findAll();
+
+    expect(result).toEqual(pdfs);
+    expect(service.findAll).toHaveBeenCalled();
+  });
+});
+```
+
+## Tests E2E
+
+```typescript
+// ✅ GOOD - Tests end-to-end con base de datos de prueba
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from './../src/app.module';
+
+describe('PdfController (e2e)', () => {
+  let app: INestApplication;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  it('/pdfs (POST) debería crear un nuevo PDF', () => {
+    return request(app.getHttpServer())
+      .post('/pdfs')
+      .attach('file', Buffer.from('fake pdf content'), 'test.pdf')
+      .field('categoryId', 'category-uuid')
+      .expect(201)
+      .expect((res) => {
+        expect(res.body).toHaveProperty('id');
+        expect(res.body.filename).toBe('test.pdf');
+      });
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+});
+```
+
+## Buenas Prácticas
+
+- Usar `describe` y `it` con descripciones claras en español
+- Un test por comportamiento/escenario
+- Usar mocks para dependencias externas
+- Tests E2E solo para flujos críticos
+- Limpiar datos de prueba después de cada test
+- Usar factories/builders para crear objetos de prueba

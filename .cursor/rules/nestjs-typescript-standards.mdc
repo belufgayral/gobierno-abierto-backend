@@ -1,0 +1,96 @@
+---
+description: Estándares de código NestJS y TypeScript para el proyecto
+alwaysApply: true
+---
+
+# Estándares NestJS y TypeScript
+
+## Estructura de Archivos
+
+- Usar nombres en kebab-case para archivos: `pdf.service.ts`, `category.controller.ts`
+- Un archivo por clase/entidad
+- Colocar tests junto al código: `pdf.service.spec.ts` al lado de `pdf.service.ts`
+
+## Convenciones de Nomenclatura
+
+```typescript
+// ✅ GOOD - Clases en PascalCase
+export class PdfService {}
+export class CategoryController {}
+
+// ✅ GOOD - Interfaces en PascalCase con prefijo I opcional
+export interface PdfMetadata {}
+export interface ICategoryDto {}
+
+// ✅ GOOD - Constantes en UPPER_SNAKE_CASE
+export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+// ✅ GOOD - Variables y funciones en camelCase
+const pdfBuffer = await readFile();
+async function validatePdfFormat() {}
+```
+
+## Decoradores y Dependencias
+
+```typescript
+// ✅ GOOD - Inyección de dependencias explícita
+@Injectable()
+export class PdfService {
+  constructor(
+    @InjectRepository(PdfEntity) private pdfRepository: Repository<PdfEntity>,
+    private readonly logger: Logger,
+  ) {}
+}
+
+// ❌ BAD - Evitar inyección implícita o uso de new
+constructor() {
+  this.repository = new PdfRepository(); // ❌
+}
+```
+
+## Manejo de Errores
+
+```typescript
+// ✅ GOOD - Usar excepciones HTTP de NestJS
+import { NotFoundException, BadRequestException } from '@nestjs/common';
+
+if (!pdf) {
+  throw new NotFoundException(`PDF con ID ${id} no encontrado`);
+}
+
+// ✅ GOOD - Logging antes de lanzar excepciones
+this.logger.error(`Error al procesar PDF: ${error.message}`, error.stack);
+throw new InternalServerErrorException('Error al procesar el archivo');
+```
+
+## DTOs y Validación
+
+```typescript
+// ✅ GOOD - Usar class-validator para validación
+import { IsString, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
+
+export class CreateCategoryDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+}
+```
+
+## Tipos y Retornos
+
+```typescript
+// ✅ GOOD - Tipos explícitos en métodos públicos
+async findAll(): Promise<Pdf[]> {
+  return this.pdfRepository.find();
+}
+
+// ✅ GOOD - Usar tipos de retorno específicos
+async findOne(id: string): Promise<Pdf | null> {
+  return this.pdfRepository.findOne({ where: { id } });
+}
+```

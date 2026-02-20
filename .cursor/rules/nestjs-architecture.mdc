@@ -1,0 +1,97 @@
+---
+description: Arquitectura y estructura de módulos NestJS
+globs: **/*.module.ts
+alwaysApply: false
+---
+
+# Arquitectura NestJS
+
+## Estructura de Módulos
+
+Organizar el código por dominio/feature, no por tipo técnico:
+
+```
+src/
+  pdfs/
+    pdf.module.ts
+    pdf.controller.ts
+    pdf.service.ts
+    pdf.entity.ts
+    pdf.dto.ts
+    pdf.repository.ts (si es necesario)
+  categories/
+    category.module.ts
+    category.controller.ts
+    category.service.ts
+    category.entity.ts
+    category.dto.ts
+```
+
+## Principios de Módulos
+
+```typescript
+// ✅ GOOD - Módulo enfocado en un dominio
+@Module({
+  imports: [TypeOrmModule.forFeature([PdfEntity])],
+  controllers: [PdfController],
+  providers: [PdfService],
+  exports: [PdfService], // Exportar servicios que otros módulos necesiten
+})
+export class PdfModule {}
+
+// ❌ BAD - Evitar módulos monolíticos con múltiples dominios
+@Module({
+  controllers: [PdfController, CategoryController, UserController],
+  providers: [PdfService, CategoryService, UserService],
+})
+export class AppModule {} // ❌
+```
+
+## Separación de Responsabilidades
+
+- **Controllers**: Solo manejan HTTP, validación de entrada, y respuestas
+- **Services**: Lógica de negocio y orquestación
+- **Repositories/Entities**: Acceso a datos y modelos
+- **DTOs**: Transferencia de datos y validación
+
+```typescript
+// ✅ GOOD - Controller delgado
+@Controller('pdfs')
+export class PdfController {
+  constructor(private readonly pdfService: PdfService) {}
+
+  @Post()
+  async create(@Body() createPdfDto: CreatePdfDto): Promise<PdfDto> {
+    return this.pdfService.create(createPdfDto);
+  }
+}
+
+// ✅ GOOD - Service con lógica de negocio
+@Injectable()
+export class PdfService {
+  async create(createPdfDto: CreatePdfDto): Promise<Pdf> {
+    // Validaciones de negocio
+    await this.validatePdfFormat(createPdfDto.file);
+    // Lógica de negocio
+    const pdf = this.pdfRepository.create(createPdfDto);
+    return this.pdfRepository.save(pdf);
+  }
+}
+```
+
+## Inyección de Dependencias
+
+```typescript
+// ✅ GOOD - Inyectar dependencias en el constructor
+@Injectable()
+export class PdfService {
+  constructor(
+    @InjectRepository(PdfEntity) private pdfRepository: Repository<PdfEntity>,
+    private categoryService: CategoryService,
+    private readonly configService: ConfigService,
+  ) {}
+}
+
+// ✅ GOOD - Usar ConfigService para variables de entorno
+const maxFileSize = this.configService.get<number>('MAX_FILE_SIZE', 10485760);
+```

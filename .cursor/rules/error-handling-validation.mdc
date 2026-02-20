@@ -1,0 +1,199 @@
+---
+description: Manejo de errores y validación en NestJS
+globs: **/*.controller.ts,**/*.service.ts,**/*.dto.ts
+alwaysApply: false
+---
+
+# Manejo de Errores y Validación
+
+## Excepciones HTTP
+
+```typescript
+// ✅ GOOD - Usar excepciones específicas de NestJS
+import {
+  NotFoundException,
+  BadRequestException,
+  UnauthorizedException,
+  ForbiddenException,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+
+// ✅ GOOD - Mensajes descriptivos en español
+if (!pdf) {
+  throw new NotFoundException(`PDF con ID ${id} no encontrado`);
+}
+
+if (file.size > MAX_FILE_SIZE) {
+  throw new BadRequestException(
+    `El archivo excede el tamaño máximo permitido de ${MAX_FILE_SIZE / 1024 / 1024}MB`,
+  );
+}
+
+// ✅ GOOD - ConflictException para duplicados
+const existingCategory = await this.categoryRepository.findOne({
+  where: { name: createCategoryDto.name },
+});
+if (existingCategory) {
+  throw new ConflictException(`Ya existe una categoría con el nombre "${createCategoryDto.name}"`);
+}
+```
+
+## Filtros de Excepciones Globales
+
+```typescript
+// ✅ GOOD - Filtro global para formatear respuestas de error
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { Request, Response } from 'express';
+
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    const message =
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : 'Error interno del servidor';
+
+    response.status(status).json({
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+      message,
+    });
+  }
+}
+
+// En main.ts
+app.useGlobalFilters(new AllExceptionsFilter());
+```
+
+## Validación con class-validator
+
+```typescript
+// ✅ GOOD - DTOs con validación completa
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsUUID,
+  MaxLength,
+  MinLength,
+  IsEnum,
+} from 'class-validator';
+
+export class CreateCategoryDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(2)
+  @MaxLength(100)
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  description?: string;
+}
+
+export class CreatePdfDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  filename: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  categoryId: string;
+}
+
+// ✅ GOOD - Validación de parámetros de ruta
+@Get(':id')
+async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<PdfDto> {
+  return this.pdfService.findOne(id);
+}
+```
+
+## Logging de Errores
+
+```typescript
+// ✅ GOOD - Logger de NestJS con contexto
+import { Logger } from '@nestjs/common';
+
+@Injectable()
+export class PdfService {
+  private readonly logger = new Logger(PdfService.name);
+
+  async create(createPdfDto: CreatePdfDto): Promise<Pdf> {
+    try {
+      const pdf = this.pdfRepository.create(createPdfDto);
+      return await this.pdfRepository.save(pdf);
+    } catch (error) {
+      this.logger.error(
+        `Error al crear PDF: ${error.message}`,
+        error.stack,
+        'PdfService.create',
+      );
+      throw new InternalServerErrorException('No se pudo crear el PDF');
+    }
+  }
+}
+```
+
+## Validación Personalizada
+
+```typescript
+// ✅ GOOD - Validadores personalizados
+import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
+
+@ValidatorConstraint({ name: 'isValidCategory', async: true })
+export class IsValidCategoryConstraint implements ValidatorConstraintInterface {
+  constructor(private categoryService: CategoryService) {}
+
+  async validate(categoryId: string, args: ValidationArguments): Promise<boolean> {
+    const category = await this.categoryService.findOne(categoryId);
+    return !!category;
+  }
+
+  defaultMessage(args: ValidationArguments): string {
+    return `La categoría con ID ${args.value} no existe`;
+  }
+}
+
+// Uso en DTO
+export class CreatePdfDto {
+  @IsUUID()
+  @Validate(IsValidCategoryConstraint)
+  categoryId: string;
+}
+```
+
+## Manejo de Errores de Base de Datos
+
+```typescript
+// ✅ GOOD - Manejar errores específicos de PostgreSQL
+import { QueryFailedError } from 'typeorm';
+
+try {
+  await this.pdfRepository.save(pdf);
+} catch (error) {
+  if (error instanceof QueryFailedError) {
+    // Error de violación de constraint único
+    if (error.code === '23505') {
+      throw new ConflictException('Ya existe un PDF con este nombre');
+    }
+    // Error de foreign key
+    if (error.code === '23503') {
+      throw new BadRequestException('La categoría especificada no existe');
+    }
+  }
+  throw error;
+}
+```
