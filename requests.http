@@ -1,0 +1,57 @@
+###
+GET http://localhost:3000/user 
+###
+POST http://localhost:3000/category
+Content-Type: application/json
+
+{
+    "name": "recibos"
+}
+
+###
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+    "name": "Ulises",
+    "surname": "Cortes",
+    "email": "uli@email.com",
+    "username": "uli",
+    "password": "1234"
+}
+###
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "username": "uli",
+    "password": "1234"
+}
+###
+DELETE http://localhost:3000/category/14
+
+###
+###
+GET http://localhost:3000/category/
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MTcwOWVkYi0yMTg5LTQwYTAtOWE4Ni01Mzc4NWI1ODI4ZmIiLCJ1c2VybmFtZSI6InVsaSIsImlhdCI6MTc3MzE3NDQ4MywiZXhwIjoxNzczMTc0NDkzfQ.Uru0V9saMN6Drzc1dpExMs6tnTkGXtps6_rKK9c48AA
+
+# token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MjU2ODY5MS1lMzc3LTRiOGYtYTBlOS0yZmQ2OGU0MTY2N2EiLCJ1c2VybmFtZSI6InVsaSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3NDQ2ODQyMCwiZXhwIjoxNzc0NDY4NDMwfQ.VGY1i0tqH4Yf_t-GbAS1WK5AyZk0XUkjsMM1-d-lhjA
+###
+GET http://localhost:3000/file/cat/haberes
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MjU2ODY5MS1lMzc3LTRiOGYtYTBlOS0yZmQ2OGU0MTY2N2EiLCJ1c2VybmFtZSI6InVsaSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3NDQ3NTA2NSwiZXhwIjoxNzc0NDc4NjY1fQ.I11wftRX9TX4rlCe3fF36CF1DX4xyFD8CS-XGYVb2Wo
+
+###
+POST http://localhost:3000/file/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MjU2ODY5MS1lMzc3LTRiOGYtYTBlOS0yZmQ2OGU0MTY2N2EiLCJ1c2VybmFtZSI6InVsaSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3NDQ3NTA2NSwiZXhwIjoxNzc0NDc4NjY1fQ.I11wftRX9TX4rlCe3fF36CF1DX4xyFD8CS-XGYVb2Wo
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="categoryId"
+
+1
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="haberes_septiembre_2025"
+Content-Type: application/pdf
+
+./haberes_septiembre_2025.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--

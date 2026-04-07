@@ -6,6 +6,7 @@ import {
     Param,
     Body,
     ParseIntPipe,
+    UseGuards,
   } from '@nestjs/common';
   import { CategoryService } from './category.service';
   

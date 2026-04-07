@@ -1,0 +1,43 @@
+1. Entra a la seccion (Ej Haberes).
+
+2. Trae los datos del servicio, con su correspondiente ID (Ej 13).
+
+3. Obtiene de respuesta un arreglo de objeto: { id, title, date, size }.
+
+4. Importo el formato GridColDef[] con las columnas definidas. EJ:
+const columns: GridColDef[] = [
+    { field: 'id', headerName: 'ID', width: 10 },
+    { field: 'title', headerName: 'Título', width: 300, editable: true },
+    { field: 'date', headerName: 'Fecha', width: 150 },
+    { field: 'size', headerName: 'Tamaño', width: 90 },
+];
+Lo subo una capa ya que en la mock table son iguales, solo cambian
+los datos de cada seccion.
+
+5. Adentro del return va la clase DataTable con las rows que me traje 
+del backend y las cols que importe.
+
+
+
+
+
+const [datos, setDatos] = useState(null);
+
+  useEffect(() => {
+    // Esta función solo se ejecutará UNA VEZ al cargar el componente
+    const obtenerDatos = async () => {
+      try {
+        const resultado = await servicio.getUnaCategoria(13);
+        console.log(resultado);
+      } catch (error) {
+        console.error("Error al conectar con NestJS:", error);
+      }
+    };
+
+    obtenerDatos();
+  }, []);
+
+
+
+
+  

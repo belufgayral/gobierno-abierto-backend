@@ -1,8 +1,10 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { File, FileType } from './entities/file.entity';
 import { STORAGE_PROVIDER, type StorageProvider } from '../storage/storage.provider.interface';
+import { FileDto } from './dto/file.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class FileService {
@@ -15,9 +17,12 @@ export class FileService {
     ) { }
 
     async uploadFile(
-        file: Express.Multer.File,
-        categoryId: number,
+        file: Express.Multer.File, categoryId: number, req: any,
     ): Promise<File> {
+        if (req.user.role !== 'admin') {
+            throw new ForbiddenException('No tienes permisos de administrador');
+        }
+
         const filePath = await this.storageProvider.upload(file, `category-${categoryId}`);
 
         const fileType = this.detectFileType(file.mimetype);
@@ -34,8 +39,27 @@ export class FileService {
         return this.fileRepository.save(newFile);
     }
 
-    async findAll(): Promise<File[]> {
+    async findAll(req: any): Promise<File[]> {
+        if (req.user.role !== 'admin') {
+            throw new ForbiddenException('No tienes permisos de administrador');
+        }
         return this.fileRepository.find({ relations: ['category'] });
+    }
+
+    async findByCategory(categoryName: string, req: any): Promise<FileDto[]> {
+        
+        if (req.user.role !== 'admin') {
+            throw new ForbiddenException('No tienes permisos de administrador');
+        }
+        
+        const files = await this.fileRepository.find({
+            where: {
+                category: {
+                    name: categoryName
+                }
+            }
+        });
+        return files.map(f => new FileDto(f.id, f.name, f.createdAt, f.size || 0));
     }
 
     async findOne(id: string): Promise<File> {
