@@ -1,0 +1,15 @@
+[Unit]
+Description=Gobierno Abierto Backend Server
+After=network.target remote-fs.target nss-lookup.target
+Documentation=https://github.com/belufgayral/gobierno-abierto-backend
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=gobiernoabierto
+WorkingDirectory=/usr/local/share/gobiernoabierto_backend
+ExecStart=node main.js
+
+[Install]
+WantedBy=multi-user.target
