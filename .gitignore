@@ -63,3 +63,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Uploads
 /uploads
+
+# package-lock.json refleja el estado de npm en cada copia de trabajo,
+# por lo que no se debe ingresar a git.
+package-lock.json
