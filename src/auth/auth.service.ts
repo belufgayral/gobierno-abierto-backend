@@ -61,4 +61,12 @@ export class AuthService {
       user: { username: user.username, role: 'admin' }, // Datos para el frontend
     };
   }
+
+  logout(response: Response) {
+    response.clearCookie('token');
+    return {
+      message: 'Logout exitoso',
+      statusCode: 200,
+    };
+  }
 }
