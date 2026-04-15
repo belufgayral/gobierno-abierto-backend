@@ -9,6 +9,9 @@ export class Category {
   @Column({ unique: true })
   name: string;
 
+  @Column({nullable: true})
+  section: string;
+
   @OneToMany(() => File, (file) => file.category)
   files: File[];
 }
