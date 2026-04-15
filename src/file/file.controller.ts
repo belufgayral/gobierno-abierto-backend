@@ -25,9 +25,10 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
     uploadFile(
       @UploadedFile() file: Express.Multer.File,
       @Body('categoryId', ParseIntPipe) categoryId: number,
+      @Body('customName') customName: string,
       @Req() req
     ) {
-      return this.fileService.uploadFile(file, categoryId, req);
+      return this.fileService.uploadFile(file, categoryId, customName, req);
     }
     @UseGuards(JwtAuthGuard)
     @Get()

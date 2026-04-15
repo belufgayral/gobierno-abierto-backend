@@ -17,7 +17,7 @@ export class FileService {
     ) { }
 
     async uploadFile(
-        file: Express.Multer.File, categoryId: number, req: any,
+        file: Express.Multer.File, categoryId: number, customName: string, req: any,
     ): Promise<File> {
         if (req.user.role !== 'admin') {
             throw new ForbiddenException('No tienes permisos de administrador');
@@ -28,7 +28,7 @@ export class FileService {
         const fileType = this.detectFileType(file.mimetype);
 
         const newFile = this.fileRepository.create({
-            name: Buffer.from(file.originalname, 'latin1').toString('utf8'),
+            name: customName || Buffer.from(file.originalname, 'latin1').toString('utf8'),
             filePath,
             type: fileType,
             mimeType: file.mimetype,
