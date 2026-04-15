@@ -2,6 +2,7 @@ import {
     Controller,
     Get,
     Post,
+    Patch,
     Delete,
     Param,
     UploadedFile,
@@ -45,7 +46,13 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
     findByCategory(@Param('category') category: string) {
       return this.fileService.findByCategory(category);
     }
-  
+
+    @UseGuards(JwtAuthGuard)
+    @Patch(':id')
+    update(@Param('id') id: string, @Body('name') name: string) {
+      return this.fileService.update(id, name);
+    }
+
     @Delete(':id')
     remove(@Param('id') id: string) {
       return this.fileService.remove(id);

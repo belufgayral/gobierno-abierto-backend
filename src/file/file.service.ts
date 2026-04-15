@@ -68,6 +68,12 @@ export class FileService {
         return file;
     }
 
+    async update(id: string, name: string): Promise<File> {
+        const file = await this.findOne(id);
+        file.name = name;
+        return this.fileRepository.save(file);
+    }
+
     async remove(id: string): Promise<void> {
         const file = await this.findOne(id);
         await this.storageProvider.delete(file.filePath);
