@@ -46,16 +46,11 @@ export class FileService {
         return this.fileRepository.find({ relations: ['category'] });
     }
 
-    async findByCategory(categoryName: string, req: any): Promise<FileDto[]> {
-        
-        if (req.user.role !== 'admin') {
-            throw new ForbiddenException('No tienes permisos de administrador');
-        }
-        
+    async findByCategory(categorySlug: string): Promise<FileDto[]> {
         const files = await this.fileRepository.find({
             where: {
                 category: {
-                    name: categoryName
+                    slug: categorySlug
                 }
             }
         });

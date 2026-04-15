@@ -40,10 +40,9 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
       return this.fileService.findOne(id);
     }
     
-    @UseGuards(JwtAuthGuard)
     @Get('cat/:category')
-    findByCategory(@Param('category') category: string, @Req() req) {
-      return this.fileService.findByCategory(category, req);
+    findByCategory(@Param('category') category: string) {
+      return this.fileService.findByCategory(category);
     }
   
     @Delete(':id')
