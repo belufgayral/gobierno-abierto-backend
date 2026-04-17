@@ -17,7 +17,7 @@ export class FileService {
     ) { }
 
     async uploadFile(
-        file: Express.Multer.File, categoryId: number, customName: string, req: any,
+        file: Express.Multer.File, categoryId: number, customName: string, trimester: string | undefined, year: number | undefined, req: any,
     ): Promise<File> {
         if (req.user.role !== 'admin') {
             throw new ForbiddenException('No tienes permisos de administrador');
@@ -33,6 +33,8 @@ export class FileService {
             type: fileType,
             mimeType: file.mimetype,
             size: file.size,
+            trimester,
+            year,
             category: { id: categoryId },
         });
 
@@ -54,7 +56,7 @@ export class FileService {
                 }
             }
         });
-        return files.map(f => new FileDto(f.id, f.name, f.createdAt, f.size || 0));
+        return files.map(f => new FileDto(f.id, f.name, f.createdAt, f.size || 0, f.trimester, f.year));
     }
 
     async findOne(id: string): Promise<File> {
@@ -68,9 +70,11 @@ export class FileService {
         return file;
     }
 
-    async update(id: string, name: string): Promise<File> {
+    async update(id: string, name?: string, trimester?: string, year?: number): Promise<File> {
         const file = await this.findOne(id);
-        file.name = name;
+        if (name !== undefined) file.name = name;
+        if (trimester !== undefined) file.trimester = trimester;
+        if (year !== undefined) file.year = year;
         return this.fileRepository.save(file);
     }
 

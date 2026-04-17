@@ -44,6 +44,12 @@ export class File {
   @Column({ nullable: true })
   size?: number; // bytes
 
+  @Column({ nullable: true })
+  trimester?: string;
+
+  @Column({ type: 'int', nullable: true })
+  year?: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -27,9 +27,12 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
       @UploadedFile() file: Express.Multer.File,
       @Body('categoryId', ParseIntPipe) categoryId: number,
       @Body('customName') customName: string,
+      @Body('trimester') trimester: string,
+      @Body('year') year: string,
       @Req() req
     ) {
-      return this.fileService.uploadFile(file, categoryId, customName, req);
+      const parsedYear = year ? parseInt(year, 10) : undefined;
+      return this.fileService.uploadFile(file, categoryId, customName, trimester, parsedYear, req);
     }
     @UseGuards(JwtAuthGuard)
     @Get()
@@ -49,8 +52,13 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 
     @UseGuards(JwtAuthGuard)
     @Patch(':id')
-    update(@Param('id') id: string, @Body('name') name: string) {
-      return this.fileService.update(id, name);
+    update(
+      @Param('id') id: string, 
+      @Body('name') name: string,
+      @Body('trimester') trimester: string,
+      @Body('year') year: number,
+    ) {
+      return this.fileService.update(id, name, trimester, year);
     }
 
     @Delete(':id')
