@@ -4,6 +4,7 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StorageModule } from 'src/storage/storage.module';
 import { User } from './entities/user.entity';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { User } from './entities/user.entity';
       StorageModule,
     ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, RolesGuard],
   exports: [UserService]
 })
 export class UserModule {}

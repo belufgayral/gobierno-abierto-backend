@@ -19,7 +19,7 @@ export class FileService {
     async uploadFile(
         file: Express.Multer.File, categoryId: number, customName: string, trimester: string | undefined, year: number | undefined, req: any,
     ): Promise<File> {
-        if (req.user.role !== 'admin') {
+        if (!['admin', 'super_admin'].includes(req.user.role)) {
             throw new ForbiddenException('No tienes permisos de administrador');
         }
 
@@ -42,7 +42,7 @@ export class FileService {
     }
 
     async findAll(req: any): Promise<File[]> {
-        if (req.user.role !== 'admin') {
+        if (!['admin', 'super_admin'].includes(req.user.role)) {
             throw new ForbiddenException('No tienes permisos de administrador');
         }
         return this.fileRepository.find({ relations: ['category'] });

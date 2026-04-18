@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   ForbiddenException,
   Injectable,
   UnauthorizedException,
@@ -11,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Response } from 'express';
+import { ChangeOwnPasswordDto } from './dto/change-own-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -30,8 +30,7 @@ export class AuthService {
   }
 
   async login(user: AuthUserDto, response: Response) {
-    const userLogin = await this.userService.getUser(user.username);
-    if (!userLogin) throw new ForbiddenException('Credenciales invalidas.');
+    const userLogin = await this.userService.getUserByEmail(user.email);
 
     const password_valid = await bcrypt.compare(
       user.password,
@@ -40,10 +39,13 @@ export class AuthService {
     if (!password_valid)
       throw new ForbiddenException('Credenciales invalidas.');
 
+    const role = userLogin.role || 'admin';
+
     const payload = {
       sub: userLogin.id,
-      username: userLogin.username,
-      role: 'admin',
+      email: userLogin.email,
+      role,
+      name: userLogin.name,
     };
 
     const access_token = await this.jwtService.signAsync(payload);
@@ -58,7 +60,12 @@ export class AuthService {
     return {
       message: 'Login exitoso',
       statusCode: 200,
-      user: { username: user.username, role: 'admin' }, // Datos para el frontend
+      user: {
+        id: userLogin.id,
+        email: userLogin.email,
+        name: userLogin.name,
+        role,
+      },
     };
   }
 
@@ -68,5 +75,39 @@ export class AuthService {
       message: 'Logout exitoso',
       statusCode: 200,
     };
+  }
+
+  /** Datos de sesión desde la DB (nombre, rol, etc. siempre actualizados; no depende del contenido del JWT). */
+  async verifySession(userId: string) {
+    const u = await this.userService.findOne(userId);
+    return {
+      statusCode: 200,
+      user: {
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        role: u.role,
+      },
+    };
+  }
+
+  async changeOwnPassword(
+    userId: string,
+    email: string,
+    dto: ChangeOwnPasswordDto,
+  ) {
+    const account = await this.userService.findOne(userId);
+    if (account.email !== email) {
+      throw new UnauthorizedException();
+    }
+    const password_valid = await bcrypt.compare(
+      dto.currentPassword,
+      account.password,
+    );
+    if (!password_valid) {
+      throw new ForbiddenException('La contraseña actual no es correcta.');
+    }
+    await this.userService.updatePasswordByUserId(userId, dto.newPassword);
+    return { message: 'Contraseña actualizada', statusCode: 200 };
   }
 }

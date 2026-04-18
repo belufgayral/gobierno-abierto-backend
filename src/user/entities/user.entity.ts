@@ -8,7 +8,7 @@ import {
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn('uuid')
-    id: number;
+    id: string;
 
     @Column()
     name: string;
@@ -16,12 +16,13 @@ export class User {
     @Column()
     surname: string;
 
-    @Column()
+    @Column({ unique: true })
     email: string;
 
     @Column()
-    username: string;
-
-    @Column()
     password: string;
+
+    /** 'admin' | 'super_admin' — default para cuentas existentes al sincronizar */
+    @Column({ type: 'varchar', length: 32, default: 'admin' })
+    role: string;
 }
