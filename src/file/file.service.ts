@@ -66,6 +66,7 @@ export class FileService {
                     f.trimester,
                     f.year,
                     f.filePath,
+                    f.type,
                 ),
         );
     }

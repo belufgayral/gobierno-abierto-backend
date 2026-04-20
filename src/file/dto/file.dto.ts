@@ -6,6 +6,7 @@ export class FileDto {
     trimester?: string;
     year?: number;
     filePath: string;
+    type?: string;
     constructor(
         id: string,
         title: string,
@@ -14,6 +15,7 @@ export class FileDto {
         trimester?: string,
         year?: number,
         filePath?: string,
+        type?: string,
     ) {
         this.id = id;
         this.title = title;
@@ -22,5 +24,6 @@ export class FileDto {
         this.trimester = trimester;
         this.year = year;
         this.filePath = filePath ?? '';
+        this.type = type;
     }
 }
