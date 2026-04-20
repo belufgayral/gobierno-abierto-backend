@@ -2,6 +2,6 @@ import { IsString, MinLength } from 'class-validator';
 
 export class AdminResetPasswordDto {
   @IsString()
-  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres.' })
+  @MinLength(4, { message: 'La contraseña debe tener al menos 4 caracteres.' })
   newPassword: string;
 }

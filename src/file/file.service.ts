@@ -56,7 +56,18 @@ export class FileService {
                 }
             }
         });
-        return files.map(f => new FileDto(f.id, f.name, f.createdAt, f.size || 0, f.trimester, f.year));
+        return files.map(
+            (f) =>
+                new FileDto(
+                    f.id,
+                    f.name,
+                    f.createdAt,
+                    f.size || 0,
+                    f.trimester,
+                    f.year,
+                    f.filePath,
+                ),
+        );
     }
 
     async findOne(id: string): Promise<File> {
