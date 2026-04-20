@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -107,7 +108,17 @@ export class UserService {
     await this.userRepository.save(user);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+    if (dto.name !== undefined) user.name = dto.name;
+    if (dto.surname !== undefined) user.surname = dto.surname;
+    if (dto.email !== undefined) user.email = dto.email;
+    if (dto.role !== undefined) user.role = dto.role;
+    return this.userRepository.save(user);
+  }
+
+  async remove(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    await this.userRepository.remove(user);
   }
 }

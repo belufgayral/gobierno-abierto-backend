@@ -12,6 +12,7 @@ import {
 import { UserService } from './user.service';
 import { CreateManagedUserDto } from 'src/auth/dto/create-managed-user.dto';
 import { AdminResetPasswordDto } from 'src/auth/dto/admin-reset-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -39,6 +40,13 @@ export class UserController {
     return safe;
   }
 
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    const u = await this.userService.updateUser(id, dto);
+    const { password: _p, ...safe } = u;
+    return safe;
+  }
+
   @Patch(':id/password')
   @HttpCode(200)
   async resetPassword(
@@ -50,7 +58,8 @@ export class UserController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+  @HttpCode(204)
+  async remove(@Param('id') id: string) {
+    await this.userService.remove(id);
   }
 }
