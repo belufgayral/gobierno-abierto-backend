@@ -1,10 +1,16 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+    Injectable,
+    Inject,
+    NotFoundException,
+    ForbiddenException,
+    BadRequestException,
+    ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { File, FileType } from './entities/file.entity';
 import { STORAGE_PROVIDER, type StorageProvider } from '../storage/storage.provider.interface';
 import { FileDto } from './dto/file.dto';
-import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class FileService {
@@ -17,10 +23,23 @@ export class FileService {
     ) { }
 
     async uploadFile(
-        file: Express.Multer.File, categoryId: number, customName: string, trimester: string | undefined, year: number | undefined, req: any,
+        file: Express.Multer.File,
+        categoryId: number,
+        customName: string,
+        trimester: string | undefined,
+        year: number | undefined,
+        isAnnualBudget: boolean | undefined,
+        req: any,
     ): Promise<File> {
         if (!['admin', 'super_admin'].includes(req.user.role)) {
             throw new ForbiddenException('No tienes permisos de administrador');
+        }
+
+        if (isAnnualBudget && !year) {
+            throw new BadRequestException('El presupuesto anual requiere un año válido');
+        }
+        if (isAnnualBudget && year) {
+            await this.ensureAnnualBudgetUniqueForYear(year);
         }
 
         const filePath = await this.storageProvider.upload(file, `category-${categoryId}`);
@@ -35,6 +54,7 @@ export class FileService {
             size: file.size,
             trimester,
             year,
+            isAnnualBudget: Boolean(isAnnualBudget),
             category: { id: categoryId },
         });
 
@@ -65,6 +85,7 @@ export class FileService {
                     f.size || 0,
                     f.trimester,
                     f.year,
+                    f.isAnnualBudget,
                     f.filePath,
                     f.type,
                 ),
@@ -82,11 +103,28 @@ export class FileService {
         return file;
     }
 
-    async update(id: string, name?: string, trimester?: string, year?: number): Promise<File> {
+    async update(
+        id: string,
+        name?: string,
+        trimester?: string,
+        year?: number,
+        isAnnualBudget?: boolean,
+    ): Promise<File> {
         const file = await this.findOne(id);
+        const nextIsAnnualBudget = isAnnualBudget ?? file.isAnnualBudget;
+        const nextYear = year ?? file.year;
+
+        if (nextIsAnnualBudget && !nextYear) {
+            throw new BadRequestException('El presupuesto anual requiere un año válido');
+        }
+        if (nextIsAnnualBudget && nextYear) {
+            await this.ensureAnnualBudgetUniqueForYear(nextYear, file.id);
+        }
+
         if (name !== undefined) file.name = name;
         if (trimester !== undefined) file.trimester = trimester;
         if (year !== undefined) file.year = year;
+        if (isAnnualBudget !== undefined) file.isAnnualBudget = isAnnualBudget;
         return this.fileRepository.save(file);
     }
 
@@ -105,5 +143,22 @@ export class FileService {
         )
             return FileType.DOC;
         return FileType.OTHER;
+    }
+
+    private async ensureAnnualBudgetUniqueForYear(
+        year: number,
+        excludeFileId?: string,
+    ): Promise<void> {
+        const existing = await this.fileRepository.findOne({
+            where: {
+                year,
+                isAnnualBudget: true,
+                ...(excludeFileId ? { id: Not(excludeFileId) } : {}),
+            },
+        });
+
+        if (existing) {
+            throw new ConflictException(`Ya existe un presupuesto anual cargado para el año ${year}`);
+        }
     }
 }

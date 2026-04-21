@@ -25,11 +25,14 @@ export class File {
   @Column()
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   trimester?: string;
 
   @Column({ type: 'int', nullable: true })
   year?: number;
+
+  @Column({ type: 'boolean', default: false })
+  isAnnualBudget: boolean;
 
   @Column()
   filePath: string;

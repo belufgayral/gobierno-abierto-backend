@@ -5,6 +5,7 @@ export class FileDto {
     size: number;
     trimester?: string;
     year?: number;
+    isAnnualBudget: boolean;
     filePath: string;
     type?: string;
     constructor(
@@ -14,6 +15,7 @@ export class FileDto {
         size: number,
         trimester?: string,
         year?: number,
+        isAnnualBudget?: boolean,
         filePath?: string,
         type?: string,
     ) {
@@ -23,6 +25,7 @@ export class FileDto {
         this.size = size;
         this.trimester = trimester;
         this.year = year;
+        this.isAnnualBudget = Boolean(isAnnualBudget);
         this.filePath = filePath ?? '';
         this.type = type;
     }
