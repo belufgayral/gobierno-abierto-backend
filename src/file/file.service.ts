@@ -11,12 +11,15 @@ import { Not, Repository } from 'typeorm';
 import { File, FileType } from './entities/file.entity';
 import { STORAGE_PROVIDER, type StorageProvider } from '../storage/storage.provider.interface';
 import { FileDto } from './dto/file.dto';
+import { Category } from '../category/entities/category.entity';
 
 @Injectable()
 export class FileService {
     constructor(
         @InjectRepository(File)
         private readonly fileRepository: Repository<File>,
+        @InjectRepository(Category)
+        private readonly categoryRepository: Repository<Category>,
 
         @Inject(STORAGE_PROVIDER)
         private readonly storageProvider: StorageProvider,
@@ -33,6 +36,20 @@ export class FileService {
     ): Promise<File> {
         if (!['admin', 'super_admin'].includes(req.user.role)) {
             throw new ForbiddenException('No tienes permisos de administrador');
+        }
+
+        const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+        if (!category) {
+            throw new NotFoundException(`Categoría con id ${categoryId} no encontrada`);
+        }
+
+        if (this.isManagementReportsCategory(category)) {
+            if (!year) {
+                throw new BadRequestException(
+                    'Informes de gestión requiere un año válido y único.',
+                );
+            }
+            await this.ensureManagementReportUniqueForYear(categoryId, year);
         }
 
         if (isAnnualBudget && !year) {
@@ -114,6 +131,21 @@ export class FileService {
         const nextIsAnnualBudget = isAnnualBudget ?? file.isAnnualBudget;
         const nextYear = year ?? file.year;
 
+        if (this.isManagementReportsCategory(file.category)) {
+            if (year !== undefined) {
+                if (!nextYear) {
+                    throw new BadRequestException(
+                        'Informes de gestión requiere un año válido y único.',
+                    );
+                }
+                await this.ensureManagementReportUniqueForYear(
+                    file.category.id,
+                    nextYear,
+                    file.id,
+                );
+            }
+        }
+
         if (nextIsAnnualBudget && !nextYear) {
             throw new BadRequestException('El presupuesto anual requiere un año válido');
         }
@@ -159,6 +191,31 @@ export class FileService {
 
         if (existing) {
             throw new ConflictException(`Ya existe un presupuesto anual cargado para el año ${year}`);
+        }
+    }
+
+    private isManagementReportsCategory(category: Pick<Category, 'name' | 'slug'>): boolean {
+        const normalizedName = category.name?.toLowerCase();
+        return category.slug === 'informes-de-gestion' || normalizedName === 'informes de gestión';
+    }
+
+    private async ensureManagementReportUniqueForYear(
+        categoryId: number,
+        year: number,
+        excludeFileId?: string,
+    ): Promise<void> {
+        const existing = await this.fileRepository.findOne({
+            where: {
+                category: { id: categoryId },
+                year,
+                ...(excludeFileId ? { id: Not(excludeFileId) } : {}),
+            },
+        });
+
+        if (existing) {
+            throw new ConflictException(
+                `Ya existe un archivo de Informes de gestión para el año ${year}.`,
+            );
         }
     }
 }
