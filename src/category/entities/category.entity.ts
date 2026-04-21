@@ -9,9 +9,12 @@ export class Category {
   @Column({ unique: true })
   name: string;
 
+  @Column({ unique: true, nullable: true })
+  slug: string;
+
   @Column({nullable: true})
   section: string;
 
-  @OneToMany(() => File, (file) => file.category)
+  @OneToMany(() => File, (file) => file.category, { cascade: ['remove'] })
   files: File[];
 }

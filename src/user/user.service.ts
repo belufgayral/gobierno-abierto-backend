@@ -2,13 +2,17 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ResponseUserDto } from './dto/response-user.dto';
+import { CreateManagedUserDto } from 'src/auth/dto/create-managed-user.dto';
+import { UserRole } from './enums/user-role.enum';
 
 @Injectable()
 export class UserService {
@@ -19,10 +23,10 @@ export class UserService {
 
   async create(user: CreateUserDto): Promise<User> {
     const exist = await this.userRepository.findOne({
-      where: [{ username: user.username }],
+      where: [{ email: user.email }],
     });
 
-    if (exist) throw new ForbiddenException('Credenciales invalidas.');
+    if (exist) throw new ForbiddenException('Ya existe un usuario con ese correo.');
 
     const SALT = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(user.password, SALT);
@@ -30,19 +34,44 @@ export class UserService {
     const new_user = this.userRepository.create({
       ...user,
       password: password,
+      role: UserRole.ADMIN,
     });
 
     return this.userRepository.save(new_user);
   }
 
-  async getUser(username: string) {
+  async createManagedUser(dto: CreateManagedUserDto): Promise<User> {
+    const exist = await this.userRepository.findOne({
+      where: [{ email: dto.email }],
+    });
+    if (exist) {
+      throw new ForbiddenException('Ya existe un usuario con ese correo.');
+    }
+
+    const SALT = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(dto.password, SALT);
+    const role =
+      dto.role === UserRole.SUPER_ADMIN ? UserRole.SUPER_ADMIN : UserRole.ADMIN;
+
+    const new_user = this.userRepository.create({
+      name: dto.name,
+      surname: dto.surname,
+      email: dto.email,
+      password,
+      role,
+    });
+
+    return this.userRepository.save(new_user);
+  }
+
+  async getUserByEmail(email: string) {
     const user = await this.userRepository.findOne({
-      where: [{ username: username }],
-      select: ['id', 'username', 'password'],
+      where: [{ email }],
+      select: ['id', 'email', 'password', 'role', 'name'],
     });
     if (!user)
       throw new ConflictException(
-        'Este username no corresponde a ningun usuario.',
+        'No existe un usuario con ese correo electrónico.',
       );
     return user;
   }
@@ -52,16 +81,44 @@ export class UserService {
     return user;
   }
 
-  async findOne(id: number): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: [{ id: id }],
+  /** Listado sin contraseña (panel super admin). */
+  async findAllPublic(): Promise<
+    Pick<User, 'id' | 'name' | 'surname' | 'email' | 'role'>[]
+  > {
+    return this.userRepository.find({
+      select: ['id', 'name', 'surname', 'email', 'role'],
+      order: { email: 'ASC' },
     });
-    if (!user)
-      throw new ConflictException('Este id no corresponde a ningun usuario.');
+  }
+
+  async findOne(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: [{ id }],
+    });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado.');
+    }
     return user;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async updatePasswordByUserId(userId: string, plainPassword: string) {
+    const user = await this.findOne(userId);
+    const SALT = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(plainPassword, SALT);
+    await this.userRepository.save(user);
+  }
+
+  async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+    if (dto.name !== undefined) user.name = dto.name;
+    if (dto.surname !== undefined) user.surname = dto.surname;
+    if (dto.email !== undefined) user.email = dto.email;
+    if (dto.role !== undefined) user.role = dto.role;
+    return this.userRepository.save(user);
+  }
+
+  async remove(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    await this.userRepository.remove(user);
   }
 }

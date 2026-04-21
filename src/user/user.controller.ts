@@ -1,34 +1,65 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-// import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateManagedUserDto } from 'src/auth/dto/create-managed-user.dto';
+import { AdminResetPasswordDto } from 'src/auth/dto/admin-reset-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('user')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('super_admin')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(@Body() user: CreateUserDto) {
-    return await this.userService.create(user);
+  async create(@Body() user: CreateManagedUserDto) {
+    return await this.userService.createManagedUser(user);
   }
 
   @Get()
   findAll() {
-    return this.userService.findAll();
+    return this.userService.findAllPublic();
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.userService.findOne(+id);
+    const u = await this.userService.findOne(id);
+    const { password: _p, ...safe } = u;
+    return safe;
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    const u = await this.userService.updateUser(id, dto);
+    const { password: _p, ...safe } = u;
+    return safe;
+  }
+
+  @Patch(':id/password')
+  @HttpCode(200)
+  async resetPassword(
+    @Param('id') id: string,
+    @Body() body: AdminResetPasswordDto,
+  ) {
+    await this.userService.updatePasswordByUserId(id, body.newPassword);
+    return { message: 'Contraseña actualizada', statusCode: 200 };
+  }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @HttpCode(204)
+  async remove(@Param('id') id: string) {
+    await this.userService.remove(id);
   }
 }

@@ -16,16 +16,15 @@ Content-Type: application/json
     "name": "Ulises",
     "surname": "Cortes",
     "email": "uli@email.com",
-    "username": "uli",
-    "password": "1234"
+    "password": "12345678"
 }
 ###
 POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-    "username": "uli",
-    "password": "1234"
+    "email": "uli@email.com",
+    "password": "12345678"
 }
 ###
 DELETE http://localhost:3000/category/14
