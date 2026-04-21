@@ -15,6 +15,6 @@ export class Category {
   @Column({nullable: true})
   section: string;
 
-  @OneToMany(() => File, (file) => file.category)
+  @OneToMany(() => File, (file) => file.category, { cascade: ['remove'] })
   files: File[];
 }

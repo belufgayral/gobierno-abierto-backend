@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
+import { File } from '../file/entities/file.entity';
 
 @Injectable()
 export class CategoryService implements OnApplicationBootstrap {
@@ -81,7 +82,16 @@ export class CategoryService implements OnApplicationBootstrap {
 
   async remove(id: number): Promise<void> {
     const category = await this.findOne(id);
-    await this.categoryRepository.remove(category);
+    await this.categoryRepository.manager.transaction(async (manager) => {
+      // Safety net: force-delete related files even if an old FK was created without CASCADE.
+      await manager
+        .createQueryBuilder()
+        .delete()
+        .from(File)
+        .where('"categoryId" = :id', { id })
+        .execute();
+      await manager.remove(Category, category);
+    });
   }
 
   async update(id: number, updateData: Partial<Category>): Promise<Category> {
