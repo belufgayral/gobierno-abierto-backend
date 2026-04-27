@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 import { AuthUserDto } from './dto/authuser.dto';
 import * as bcrypt from 'bcrypt';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
-import { ResponseUserDto } from 'src/user/dto/response-user.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { ResponseUserDto } from '../user/dto/response-user.dto';
 import { Response } from 'express';
 import { ChangeOwnPasswordDto } from './dto/change-own-password.dto';
 

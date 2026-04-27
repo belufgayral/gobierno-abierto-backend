@@ -9,8 +9,9 @@ export class LocalStorageProvider implements StorageProvider {
     file: Express.Multer.File,
     destination: string,
   ): Promise<string> {
-    const storageBase =
-      process.env.STORAGE_PATH || path.join(process.cwd(), 'uploads');
+    const storageBase = process.env.STORAGE_PATH;
+    if (!storageBase) throw new Error('No hay variable de entorno definida para la carpeta fisica donde se guardan los archivos.');
+
     const uploadDir = path.join(storageBase, destination);
     // const uploadDir = path.join(process.cwd(), 'uploads', destination);
 
@@ -27,11 +28,16 @@ export class LocalStorageProvider implements StorageProvider {
 
     fs.writeFileSync(filePath, file.buffer);
 
-    return `uploads/${destination}/${fileName}`;
+    return `storageBase/${destination}/${fileName}`;
   }
 
   async delete(filePath: string): Promise<void> {
-    const fullPath = path.join(process.cwd(), filePath);
+    const storageBase = process.env.STORAGE_PATH || path.join(process.cwd(), 'uploads');
+    if (!storageBase) throw new Error('No hay variable de entorno definida para la carpeta fisica donde se guardan los archivos.');
+
+    const relativePath = filePath.replace('uploads/', '');
+
+    const fullPath = path.join(storageBase, relativePath);
     if (fs.existsSync(fullPath)) {
       fs.unlinkSync(fullPath);
     }

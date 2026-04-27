@@ -11,7 +11,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ResponseUserDto } from './dto/response-user.dto';
-import { CreateManagedUserDto } from 'src/auth/dto/create-managed-user.dto';
+import { CreateManagedUserDto } from '../auth/dto/create-managed-user.dto';
 import { UserRole } from './enums/user-role.enum';
 
 @Injectable()

@@ -10,12 +10,12 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateManagedUserDto } from 'src/auth/dto/create-managed-user.dto';
-import { AdminResetPasswordDto } from 'src/auth/dto/admin-reset-password.dto';
+import { CreateManagedUserDto } from '../auth/dto/create-managed-user.dto';
+import { AdminResetPasswordDto } from '../auth/dto/admin-reset-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard, RolesGuard)

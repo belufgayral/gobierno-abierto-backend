@@ -17,7 +17,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
 import { memoryStorage } from 'multer';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
 import type {Response} from 'express';
 
 @Controller('file')
@@ -69,13 +69,8 @@ export class FileController {
   }
 
   @Get('download/:id')
-  // @UseGuards(JwtAuthGuard)
   async downloadFile(@Param('id') id: string, @Res() res: Response) {
     const file = await this.fileService.findOne(id);
-    console.log("FILE--->", file)
-    // file.filePath es la ruta que guardaste (absoluta o relativa)
-    // res.sendFile es eficiente porque hace streaming del archivo
-    // return res.download(file.filePath);
     return res.sendFile(file.filePath, { root: './' });
   }
 

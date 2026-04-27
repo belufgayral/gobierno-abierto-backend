@@ -3,13 +3,15 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
-import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useStaticAssets(join(process.cwd(), 'uploads'), {
-    prefix: '/uploads/',
-  });
+  const origin = process.env.FRONTEND_PATH;
+  const port = process.env.PORT;
+
+  if(!origin) throw new Error('No hay variable de entorno definida para el frontend');
+  if(!port) throw new Error('No hay variable de entorno definida para el puerto');
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -19,10 +21,10 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.enableCors({
-    origin: ['http://localhost:3001', 'http://192.168.0.77:3000'], // El puerto donde corre tu Angular
+    origin: origin.split(','), 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // Permitir envío de cookies si lo necesitas
+    credentials: true,
   });
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(port);
 }
 bootstrap();
