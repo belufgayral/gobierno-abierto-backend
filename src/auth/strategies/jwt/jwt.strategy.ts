@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: 'jorge', // Usa variables de entorno en prod
+      secretOrKey: `${process.env.SECRET_KEY_JWT}`, // Usa variables de entorno en prod
     });
   }
 

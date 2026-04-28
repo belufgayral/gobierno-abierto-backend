@@ -13,7 +13,6 @@ export class LocalStorageProvider implements StorageProvider {
     if (!storageBase) throw new Error('No hay variable de entorno definida para la carpeta fisica donde se guardan los archivos.');
 
     const uploadDir = path.join(storageBase, destination);
-    // const uploadDir = path.join(process.cwd(), 'uploads', destination);
 
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });

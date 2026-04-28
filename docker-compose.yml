@@ -6,13 +6,13 @@ services:
     container_name: gobierno-abierto-postgresql
     restart: unless-stopped
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: gobierno-abierto-db
+      POSTGRES_USER: ${USER_POSTGRES}
+      POSTGRES_PASSWORD: ${PASSWORD_POSTGRES}
+      POSTGRES_DB: ${DATABASE_POSTGRES}
     ports:
-      - "5432:5432"
+      - "${PORT_EXTERNAL_POSTGRES}:${PORT_INTERNAL_POSTGRES}"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ${PATH_POSTGRES}:/var/lib/postgresql/data
     networks:
       - app-network
 
@@ -24,14 +24,14 @@ services:
     depends_on:
       - postgres
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: admin
-      DB_PASS: 1234
-      DB_NAME: gobierno-abierto-db
+      DB_HOST: ${HOST_DB}
+      DB_PORT: ${PORT_EXTERNAL_POSTGRES}
+      DB_USER: ${USER_DB}
+      DB_PASS: ${PASS_DB}
+      DB_NAME: ${NAME_DB}
       NODE_ENV: development
     ports:
-      - "3000:3000"
+      - "${PORT_EXTERNAL_DB}:${PORT_INTERNAL_DB}"
     volumes:
       - .:/app
       - /app/node_modules
@@ -41,12 +41,12 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     ports:
-      - "8080:80"
+      - "${PORT_EXTERNAL_PGADMIN}:${PORT_INTERNAL_PGADMIN}"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: 1234
+      PGADMIN_DEFAULT_EMAIL: ${EMAIL_PGADMIN}
+      PGADMIN_DEFAULT_PASSWORD: ${PASSWORD_PGADMIN}
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - ${PATH_PGADMIN}:/var/lib/pgadmin
     networks:
       - app-network
 
