@@ -25,16 +25,17 @@ services:
       - postgres
     environment:
       DB_HOST: ${HOST_DB}
-      DB_PORT: ${PORT_EXTERNAL_POSTGRES}
-      DB_USER: ${USER_DB}
-      DB_PASS: ${PASS_DB}
-      DB_NAME: ${NAME_DB}
+      DB_PORT: ${PORT_INTERNAL_POSTGRES}
+      DB_USER: ${USER_POSTGRES}
+      DB_PASS: ${PASSWORD_POSTGRES}
+      DB_NAME: ${DATABASE_POSTGRES}
       NODE_ENV: development
     ports:
       - "${PORT_EXTERNAL_DB}:${PORT_INTERNAL_DB}"
     volumes:
       - .:/app
       - /app/node_modules
+      - ${STORAGE_PATH}:/app/uploads
     networks:
       - app-network
 
