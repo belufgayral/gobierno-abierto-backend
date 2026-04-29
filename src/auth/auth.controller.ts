@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthUserDto } from './dto/authuser.dto';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import type { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
 import { ChangeOwnPasswordDto } from './dto/change-own-password.dto';
