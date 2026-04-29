@@ -1,126 +1,72 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# **Backend gobierno abierto**
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# ![Node Version](https://img.shields.io/badge/node-%3E%3D18.19.0-brightgreen) ![Docker](https://img.shields.io/badge/docker-%3E%3D24.0.0-blue?logo=docker&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/postgresql-15%2B-blue?logo=postgresql&logoColor=white) ![TypeORM](https://img.shields.io/badge/TypeORM-%5E0.3.28-brightgreen) ![NestJS Version](https://img.shields.io/badge/nestjs-%5E11.1.15-red?logo=nestjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/typescript-%5E5.9.3-blue?logo=typescript&logoColor=white) ![Auth](https://img.shields.io/badge/auth-JWT%2BPassport-orange) ![License](https://img.shields.io/badge/license-UNLICENSED-lightgrey)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-Backend para el proyecto Gobierno Abierto construido con [NestJS](https://github.com/nestjs/nest) framework TypeScript.
+## **Breve descripcion**
+Backend para el proyecto Gobierno Abierto construido con _NestJS_ framework y TypeScript.
 
 Este proyecto gestiona PDFs y categorías asociadas, utilizando PostgreSQL como base de datos y Docker para contenedores.
 
-## Estándares de Código
+## **Configuración del Entorno (.env)** 
+Para que el sistema funcione, se debe crear un archivo .env en la raíz basado en el archivo .env.example.
 
-Este proyecto sigue estándares de código definidos en [`docs/CODING_STANDARDS.md`](./docs/CODING_STANDARDS.md).
+### Configuración inicial 
 
-### Herramientas de Validación
+- Copie el archivo de ejemplo: cp .env.example .env
 
-- **ESLint**: Validación de código TypeScript
-- **Prettier**: Formateo consistente
-- **TypeScript**: Verificación de tipos
+- Edite el archivo .env recién creado y complete las variables DB_PASSWORD y JWT_SECRET.
 
-Ejecuta antes de commit:
+- Asegúrese de que el puerto definido en PORT_EXTERNAL esté libre en el servidor.
 
-```bash
-npm run lint      # Validar código
-npm run format    # Formatear código
-npm run test      # Ejecutar tests
-```
+## **Despliegue con Docker**
+### Instrucciones para levantar el entorno completo (API + Base de Datos).
+docker-compose up -d --build
 
-### Reglas de Cursor (Opcional)
+docker-compose logs -f backend
+## **Arquitectura y Módulos**
+Este sistema esta organizado en 5 modulos, algunos independientes y otros dependientes entre si, para que el codigo pueda ser facil de mantener y escalable. 
 
-Si usas [Cursor IDE](https://cursor.sh), encontrarás reglas automáticas en `.cursor/rules/` que guían al asistente de IA basándose en nuestros estándares. Estas reglas son **opcionales** y no requieren que todo el equipo use Cursor.
+### Modulos principales:
+- **Auth**
+> El encargado de autenticar usuarios y gestionar los tokens del sistema.
+- **Category**
+> Aqui se encuentra el archivo de las categorias que va a tener el sistema.
+- **File**
+> Este modulo maneja los archivos que se agregan al sistema, directamente relacionado con el modulo de categorias ya que no puede existir un archivo sin una categoria asociada.
+- **Storage**
+> El encargado de administrar donde se guardan los archivos.
+- **User**
+> Este modulo tiene la finalidad de gestionar los usuarios que se crean.
+- **App**
+> El modulo principal donde se maneja la conexion a la base de datos y el arranque del sistema.
 
-- Los estándares están documentados en `docs/CODING_STANDARDS.md` para todos los IDEs
-- Las reglas de Cursor proporcionan asistencia automática adicional si usas ese IDE
-- Otros miembros del equipo pueden usar VS Code, WebStorm, o cualquier otro IDE
+### Capas de aplicacion:
+- **Controller**
+> Esta es la cara visible del proyecto, siendo con quien se comunica el frontend. Es el encargado de recibir peticiones, llamar al servicio y responder.
+- **Service**
+> Aqui sucede la logica del negocio, en donde se manipulan los datos que se mueven. En esta instancia se manejan los archivos, categorias y usuarios que van a interactuar en el sistema.
+- **Entities**
+> Las entidades que se van a crear en las bases de datos se definen acá, cada una con sus condiguraciones internas.
 
-## Project setup
 
-```bash
-$ npm install
-```
+<!-- ## Documentación de la API (Swagger)
+Una vez levantado el servidor, la documentación interactiva está disponible en:http://localhost:[PUERTO]/docs
+ 
+Aquí se detallan los endpoints, los DTOs de entrada y las respuestas esperadas. -->
+## **Seguridad**
+Se han implementado múltiples capas de seguridad para garantizar la integridad de la información:
 
-## Compile and run the project
+- **Autenticación**
+>Gestión de sesiones mediante JWT (JSON Web Tokens) con expiración configurable.
 
-```bash
-# development
-$ npm run start
+- **Encriptación** 
+>Uso de Bcrypt para el hasheo de contraseñas de usuarios antes de su persistencia en la base de datos.
 
-# watch mode
-$ npm run start:dev
+- **Protección de Rutas**
+>Implementación de Guards y estrategias de Passport para restringir el acceso a endpoints sensibles.
 
-# production mode
-$ npm run start:prod
-```
+- **Validación**
+>Uso de ValidationPipe global para asegurar que los datos de entrada cumplan con los formatos esperados, evitando datos malformados.
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- **CORS** 
+>Configuración estricta de orígenes permitidos para limitar el acceso solo desde el frontend oficial.
