@@ -18,12 +18,13 @@ export enum FileType {
 @Entity('files')
 @Index(['category', 'createdAt'])
 @Index(['type'])
+@Index(['year', 'name'])
 export class File {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ type: 'text', nullable: true })
   trimester?: string;
@@ -32,10 +33,10 @@ export class File {
   year?: number;
 
   @Column({ type: 'boolean', default: false })
-  isAnnualBudget: boolean;
+  isAnnualBudget!: boolean;
 
   @Column()
-  filePath: string;
+  filePath!: string;
 
   //tipo de archivo
   @Column({
@@ -43,7 +44,7 @@ export class File {
     enum: FileType,
     default: FileType.OTHER,
   })
-  type: FileType;
+  type!: FileType;
 
   //opcional pero MUY útil
   @Column({ nullable: true })
@@ -54,11 +55,11 @@ export class File {
   size?: number; // bytes
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @ManyToOne(() => Category, (category) => category.files, {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  category: Category;
+  category!: Category;
 }

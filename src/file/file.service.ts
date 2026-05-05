@@ -85,14 +85,25 @@ export class FileService {
         return this.fileRepository.find({ relations: ['category'] });
     }
 
-    async findByCategory(categorySlug: string): Promise<FileDto[]> {
-        const files = await this.fileRepository.find({
+    async findByCategory(categorySlug: string, limit?: number): Promise<FileDto[]> {
+        const options: any = {
             where: {
                 category: {
                     slug: categorySlug
                 }
+            },
+            order: {
+                year: 'DESC',
+                name: 'DESC'
             }
-        });
+        }
+        if (limit) {
+            options.take = limit;
+            // options.order = {
+            //     year: 'DESC'
+            // };
+        }
+        const files = await this.fileRepository.find(options);
         return files.map(
             (f) =>
                 new FileDto(
@@ -116,6 +127,24 @@ export class FileService {
         });
 
         if (!file) throw new NotFoundException(`Archivo con id ${id} no encontrado`);
+
+        return file;
+    }
+
+    async findGuide(): Promise<File> {
+        const file = await this.fileRepository.findOne({
+            where: {
+                category: {
+                    slug: 'guias-de-usuario'
+                }
+            },
+            relations: ['category'],
+            order: {
+                createdAt: 'DESC'
+            },
+        });
+
+        if (!file) throw new NotFoundException(`Archivo no encontrado`);
 
         return file;
     }

@@ -41,11 +41,11 @@ DELETE http://localhost:3000/category/14
 
 ###
 ###
-GET http://localhost:3000/category/
+GET http://localhost:3000/category/2
 ###
 GET http://localhost:3000/file/download/2
 ###
-GET http://localhost:3000/file/cat/declaraciones-juradas
+GET http://localhost:3000/file/guide/download
 # Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MjU2ODY5MS1lMzc3LTRiOGYtYTBlOS0yZmQ2OGU0MTY2N2EiLCJ1c2VybmFtZSI6InVsaSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3NDQ3NTA2NSwiZXhwIjoxNzc0NDc4NjY1fQ.I11wftRX9TX4rlCe3fF36CF1DX4xyFD8CS-XGYVb2Wo
 
 ###

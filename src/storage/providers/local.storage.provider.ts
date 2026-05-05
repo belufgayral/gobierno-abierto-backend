@@ -10,9 +10,10 @@ export class LocalStorageProvider implements StorageProvider {
     destination: string,
   ): Promise<string> {
     const storageBase = process.env.STORAGE_PATH;
+    console.log('Valor de STORAGE_PATH:', process.env.STORAGE_PATH);
     if (!storageBase) throw new Error('No hay variable de entorno definida para la carpeta fisica donde se guardan los archivos.');
 
-    const uploadDir = path.join(storageBase, destination);
+    const uploadDir = path.resolve(path.join(storageBase, destination));
 
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -27,7 +28,7 @@ export class LocalStorageProvider implements StorageProvider {
 
     fs.writeFileSync(filePath, file.buffer);
 
-    return `storageBase/${destination}/${fileName}`;
+    return `${storageBase}/${destination}/${fileName}`;
   }
 
   async delete(filePath: string): Promise<void> {

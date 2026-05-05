@@ -68,9 +68,21 @@ export class FileController {
     return this.fileService.findByCategory(category);
   }
 
+  @Get('cat/:category/latest')
+  findByCategoryLatest(@Param('category') category: string) {
+    return this.fileService.findByCategory(category, 4);
+  }
+
   @Get('download/:id')
   async downloadFile(@Param('id') id: string, @Res() res: Response) {
     const file = await this.fileService.findOne(id);
+    return res.sendFile(file.filePath, { root: './' });
+  }
+
+  @Get('guide/download')
+  async downloadGuide(@Res() res: Response) {
+    const file = await this.fileService.findGuide();
+    res.setHeader('Content-Type', 'application/pdf');
     return res.sendFile(file.filePath, { root: './' });
   }
 
