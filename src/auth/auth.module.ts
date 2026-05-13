@@ -9,7 +9,7 @@ import { JwtStrategy } from './strategies/jwt/jwt.strategy';
   imports: [
     UserModule,
     JwtModule.register({
-      secret: 'jorge', // Debería venir de una variable de entorno
+      secret: process.env.SECRET_KEY_JWT, // Debería venir de una variable de entorno
       signOptions: { expiresIn: '1h' },
     }),
   ],
