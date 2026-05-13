@@ -1,17 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer'
 
 @Injectable()
 export class EmailService {
-    private resend = new Resend(process.env.RESEND_API_KEY);
+    private transporter: nodemailer.Transporter;
+
+    constructor() {
+        // El transporter reemplaza a "new Resend"
+        this.transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT),
+            secure: process.env.SMTP_SECURE === 'true', // true para 465, false para otros
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
+            pool: true, // Recomendado para reutilizar la conexión
+        });
+    }
 
     async sendContact(name: string, message: string) {
-        const email = process.env.RESEND_EMAIL;
-        if(!email) throw new Error("No hay email de recepcion.")
+        const emailRecepcion = process.env.RECEIVER_EMAIL; // El mail que recibe
+        if (!emailRecepcion) throw new Error("No hay email de recepción.");
+
         try {
-            const data = await this.resend.emails.send({
-                from: 'Portal Abierto Lobería <onboarding@resend.dev>',
-                to: [email],
+            // .sendMail() reemplaza a .emails.send()
+            await this.transporter.sendMail({
+                // El "from" ahora debe ser generalmente el usuario del SMTP
+                from: `"Portal Abierto Lobería" <${process.env.SMTP_USER}>`,
+                to: emailRecepcion,
                 subject: `Nuevo mensaje de contacto — ${name}`,
                 html: `
                     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
@@ -32,6 +50,7 @@ export class EmailService {
             });
             return { success: true };
         } catch (error) {
+            console.error(error); // Siempre es bueno loguear el error real de SMTP
             throw new Error('Error al enviar el email');
         }
     }

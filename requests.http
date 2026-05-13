@@ -1,5 +1,5 @@
 ###
-GET http://localhost:3000/user 
+GET https://gobiernoabierto.loberia.gob.ar/backend/user 
 ###
 POST http://localhost:3000/category
 Content-Type: application/json
@@ -7,16 +7,17 @@ Content-Type: application/json
 {
     "name": "recibos"
 }
-
+https://gobiernoabierto.loberia.gob.ar 
 ###
 POST http://localhost:3000/auth/register
+# POST https://gobiernoabierto.loberia.gob.ar/backend/auth/register
 Content-Type: application/json
 
 {
   "name": "Super",
   "surname": "Admin",
   "email": "superadmin@loberia.gob.ar",
-  "password": "Admin1234"
+  "password": "mlO9m_e52wnqvFDctxsz"
 }
 ###
 POST http://localhost:3000/auth/register
@@ -63,3 +64,13 @@ Content-Type: application/pdf
 
 ./haberes_septiembre_2025.pdf
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Enviar mensaje de contacto
+POST http://localhost:3000/email/contact
+Content-Type: application/json
+
+{
+    "name": "Ulises",
+    "message": "Probando el nuevo sistema con Nodemailer desde REST Client",
+    "subscribe": true
+}

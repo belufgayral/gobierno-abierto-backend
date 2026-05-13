@@ -9,6 +9,7 @@ import { StorageModule } from './storage/storage.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.entity';
+import { EmailModule } from './email/email.module';
 // import { TestModule } from './test/test.module';
 
 @Module({
@@ -28,7 +29,8 @@ import { User } from './user/entities/user.entity';
     CategoryModule,
     StorageModule,
     UserModule,
-    AuthModule
+    AuthModule,
+    EmailModule
     // TestModule,
   ],
 })

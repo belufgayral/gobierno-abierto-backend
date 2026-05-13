@@ -52,8 +52,8 @@ export class AuthService {
 
     response.cookie('token', access_token, {
       httpOnly: true,
-      secure: false, // Cambia a true solo si usas HTTPS (producción)
-      sameSite: 'lax',
+      secure: true, // Cambia a true solo si usas HTTPS (producción)
+      sameSite: 'none',
       expires: new Date(Date.now() + 3600000),
     });
 
