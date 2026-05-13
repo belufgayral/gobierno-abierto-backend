@@ -9,8 +9,8 @@ Content-Type: application/json
 }
 https://gobiernoabierto.loberia.gob.ar 
 ###
-POST http://localhost:3000/auth/register
-# POST https://gobiernoabierto.loberia.gob.ar/backend/auth/register
+# POST http://localhost:3000/auth/register
+POST https://gobiernoabierto.loberia.gob.ar/backend/auth/register
 Content-Type: application/json
 
 {
@@ -74,3 +74,26 @@ Content-Type: application/json
     "message": "Probando el nuevo sistema con Nodemailer desde REST Client",
     "subscribe": true
 }
+###
+POST https://gobiernoabierto.loberia.gob.ar/files/upload
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYmZjYmMwNC0zMGM4LTQ4ZjItOGJhYy01NzMyMDQ5MTRjMmIiLCJlbWFpbCI6InN1cGVyYWRtaW5AbG9iZXJpYS5nb2IuYXIiLCJyb2xlIjoic3VwZXJhZG1pbiIsIm5hbWUiOiJTdXBlciIsImlhdCI6MTc3ODY4OTE4OCwiZXhwIjoxNzc4NjkyNzg4fQ.FQKgA_ZF-uTx-XJM5Tj7IWGQ2jfY6tRA-EU-0wPKEhU
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="categoryId"
+
+12
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="customName"
+
+Informe de Gestion Municipal 2026
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="year"
+
+2026
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="informe.pdf"
+Content-Type: application/pdf
+
+< ./documentos/informe_loberia.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
