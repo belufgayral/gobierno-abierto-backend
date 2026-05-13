@@ -17,7 +17,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   async register(user: CreateUserDto): Promise<ResponseUserDto> {
     const rsp = await this.userService.create(user);
@@ -81,13 +81,10 @@ export class AuthService {
   async verifySession(userId: string) {
     const u = await this.userService.findOne(userId);
     return {
-      statusCode: 200,
-      user: {
-        id: u.id,
-        email: u.email,
-        name: u.name,
-        role: u.role,
-      },
+      id: u.id,
+      email: u.email,
+      name: u.name,
+      role: u.role,
     };
   }
 
