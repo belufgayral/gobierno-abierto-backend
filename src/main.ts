@@ -6,6 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 1);
   const origin = process.env.FRONTEND_PATH;
   const port = process.env.PORT;
 
