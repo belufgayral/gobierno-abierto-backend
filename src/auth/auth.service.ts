@@ -53,7 +53,7 @@ export class AuthService {
     response.cookie('token', access_token, {
       httpOnly: true,
       secure: true, // Cambia a true solo si usas HTTPS (producción)
-      sameSite: 'none',
+      sameSite: 'lax',
       expires: new Date(Date.now() + 3600000),
       path: '/',
     });
