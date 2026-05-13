@@ -55,6 +55,7 @@ export class AuthService {
       secure: true, // Cambia a true solo si usas HTTPS (producción)
       sameSite: 'none',
       expires: new Date(Date.now() + 3600000),
+      path: '/',
     });
 
     return {
