@@ -3,6 +3,7 @@ USUARIO_DESPLIEGUE=gobiernoabierto
 GRUPO_DESPLIEGUE=gobiernoabierto
 TARGET=dist/
 NODE_MODULES=node_modules
+CARPETA_UPLOADS=uploads
 
 BASE_SYSTEMD=/etc/systemd/system
 SERVICIOS_SYSTEMD=systemd/gobiernoabierto_backend.service
@@ -24,7 +25,8 @@ build :
 
 install : build
 	sudo install -d -o $(USUARIO_DESPLIEGUE) -g $(GRUPO_DESPLIEGUE) -m 755 $(DIRECTORIO_BASE)
-	sudo rsync -rlD --delete --exclude .env --exclude node_modules $(TARGET) $(DIRECTORIO_BASE)
+	sudo install -d -o $(USUARIO_DESPLIEGUE) -g $(GRUPO_DESPLIEGUE) -m 755 $(DIRECTORIO_BASE)/$(CARPETA_UPLOADS)
+	sudo rsync -rlD --delete --exclude .env --exclude node_modules --exclude $(CARPETA_UPLOADS) $(TARGET) $(DIRECTORIO_BASE)
 	sudo rsync -rlD --delete $(NODE_MODULES) $(DIRECTORIO_BASE)
 	sudo chown -R $(USUARIO_DESPLIEGUE):$(GRUPO_DESPLIEGUE) $(DIRECTORIO_BASE)
 	sudo install -m 644 $(SERVICIOS_SYSTEMD) $(BASE_SYSTEMD)
@@ -33,6 +35,6 @@ install : build
 	#sudo systemctl restart gobiernoabierto_backend
 
 deploy : build
-	rsync -rlD --delete --exclude .env --exclude node_modules $(TARGET) $(DIRECTORIO_BASE)
+	rsync -rlD --delete --exclude .env --exclude node_modules --exclude $(CARPETA_UPLOADS) $(TARGET) $(DIRECTORIO_BASE)
 	rsync -rlD --delete $(NODE_MODULES) $(DIRECTORIO_BASE)
 	sudo systemctl restart gobiernoabierto_backend
