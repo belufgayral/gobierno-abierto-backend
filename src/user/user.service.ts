@@ -110,6 +110,17 @@ export class UserService {
 
   async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
+
+    if (
+      dto.role !== undefined &&
+      user.role === UserRole.SUPER_ADMIN &&
+      dto.role !== user.role
+    ) {
+      throw new ForbiddenException(
+        'No se puede modificar el rol de un super administrador.',
+      );
+    }
+
     if (dto.name !== undefined) user.name = dto.name;
     if (dto.surname !== undefined) user.surname = dto.surname;
     if (dto.email !== undefined) user.email = dto.email;
@@ -119,6 +130,19 @@ export class UserService {
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
+
+    if (user.role === UserRole.SUPER_ADMIN) {
+      const superAdminCount = await this.userRepository.count({
+        where: { role: UserRole.SUPER_ADMIN },
+      });
+
+      if (superAdminCount <= 1) {
+        throw new ConflictException(
+          'No se puede eliminar al único super administrador. Debe existir al menos un super administrador en el sistema.',
+        );
+      }
+    }
+
     await this.userRepository.remove(user);
   }
 }
