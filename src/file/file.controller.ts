@@ -18,7 +18,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
-import type {Response} from 'express';
+import type { Response } from 'express';
+import * as path from 'path';
+import type { File as FileEntity } from './entities/file.entity';
 
 @Controller('file')
 export class FileController {
@@ -76,14 +78,33 @@ export class FileController {
   @Get('download/:id')
   async downloadFile(@Param('id') id: string, @Res() res: Response) {
     const file = await this.fileService.findOne(id);
+    this.setDownloadHeaders(res, file);
     return res.sendFile(file.filePath, { root: './' });
   }
 
   @Get('guide/download')
   async downloadGuide(@Res() res: Response) {
     const file = await this.fileService.findGuide();
-    res.setHeader('Content-Type', 'application/pdf');
+    this.setDownloadHeaders(res, file);
     return res.sendFile(file.filePath, { root: './' });
+  }
+
+  private setDownloadHeaders(res: Response, file: FileEntity): void {
+    const nameHasExtension = path.extname(file.name).length > 0;
+    const downloadName = nameHasExtension
+      ? file.name
+      : `${file.name}${path.extname(file.filePath)}`;
+
+    const asciiFallback = downloadName.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, '');
+
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encodeURIComponent(downloadName)}`,
+    );
+
+    if (file.mimeType) {
+      res.setHeader('Content-Type', file.mimeType);
+    }
   }
 
   @UseGuards(JwtAuthGuard)

@@ -43,6 +43,10 @@ export class FileService {
             throw new NotFoundException(`Categoría con id ${categoryId} no encontrada`);
         }
 
+        if (this.isUserGuideCategory(category)) {
+            await this.ensureUserGuideUnique(categoryId);
+        }
+
         if (this.isManagementReportsCategory(category)) {
             if (!year) {
                 throw new BadRequestException(
@@ -226,6 +230,27 @@ export class FileService {
     private isManagementReportsCategory(category: Pick<Category, 'name' | 'slug'>): boolean {
         const normalizedName = category.name?.toLowerCase();
         return category.slug === 'informes-de-gestion' || normalizedName === 'informes de gestión';
+    }
+
+    private isUserGuideCategory(category: Pick<Category, 'name' | 'slug'>): boolean {
+        const normalizedName = category.name?.toLowerCase();
+        return (
+            category.slug === 'guias-de-usuario' ||
+            normalizedName === 'guías de usuario' ||
+            normalizedName === 'guia de usuario'
+        );
+    }
+
+    private async ensureUserGuideUnique(categoryId: number): Promise<void> {
+        const existing = await this.fileRepository.findOne({
+            where: { category: { id: categoryId } },
+        });
+
+        if (existing) {
+            throw new ConflictException(
+                'Ya existe una guía de usuario cargada. Eliminá la actual antes de subir una nueva.',
+            );
+        }
     }
 
     private async ensureManagementReportUniqueForYear(

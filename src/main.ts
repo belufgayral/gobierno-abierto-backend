@@ -25,6 +25,7 @@ async function bootstrap() {
     origin: origin.split(','), 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+    exposedHeaders: ['Content-Disposition'],
   });
   await app.listen(port);
 }
