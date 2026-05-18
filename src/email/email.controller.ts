@@ -6,7 +6,7 @@ export class EmailController {
     constructor(private readonly emailService: EmailService) {}
 
   @Post('contact')
-  async sendEmail(@Body() body: { name: string; message: string; subscribe: boolean }) {
-    return this.emailService.sendContact(body.name, body.message);
+  async sendEmail(@Body() body: { name: string; message: string; dni: string, contacto: string }) {
+    return this.emailService.sendContact(body.name, body.message, body.dni, body.contacto);
   }
 }
